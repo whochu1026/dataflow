@@ -1,0 +1,20 @@
+{
+  "name": "dataflow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run test -w @dataflow/api",
+    "dev:api": "npm run start:dev -w @dataflow/api",
+    "dev:web": "npm run dev -w @dataflow/web",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "private": "true",
+  "workspaces": [
+    "apps/*"
+  ]
+}

@@ -1,0 +1,7 @@
+Email,Full Name,Phone,Amount,Order Date
+alice@example.com,Alice Kim,010-1111-2222,120.50,2024-01-15
+bob@example.com,Bob Lee,010-3333-4444,89.00,2024-02-01
+bad-email,Charlie,010-5555,not-a-number,yesterday
+alice@example.com,Alice Kim,010-1111-2222,120.50,2024-01-15
+,Missing Name,010-9999-0000,10,2024-03-01
+dave@example.com,Dave Park,+82 10-7777-8888,45.25,2024-04-10

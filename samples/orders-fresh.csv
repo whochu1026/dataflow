@@ -1,0 +1,5 @@
+Email,Full Name,Phone,Amount,Order Date
+fresh1@example.com,Fresh One,010-1000-1000,10.00,2024-05-01
+fresh2@example.com,Fresh Two,010-2000-2000,20.00,2024-05-02
+not-an-email,Bad Row,010-3000,xx,nope
+fresh1@example.com,Fresh One,010-1000-1000,10.00,2024-05-01

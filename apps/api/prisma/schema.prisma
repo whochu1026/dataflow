@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  passwordHash String      @map("password_hash")
+  name         String
+  createdAt    DateTime    @default(now()) @map("created_at")
+  updatedAt    DateTime    @updatedAt @map("updated_at")
+  jobs         ImportJob[]
+
+  @@map("users")
+}
+
+enum JobStatus {
+  UPLOADED
+  MAPPED
+  QUEUED
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+
+  @@map("job_status")
+}
+
+enum FieldType {
+  STRING
+  EMAIL
+  INTEGER
+  DECIMAL
+  DATE
+  PHONE
+
+  @@map("field_type")
+}
+
+model ImportJob {
+  id                   String         @id @default(cuid())
+  userId               String         @map("user_id")
+  originalName         String         @map("original_name")
+  storedPath           String         @map("stored_path")
+  mimeType             String         @map("mime_type")
+  sizeBytes            Int            @map("size_bytes")
+  fileKind             String         @default("csv") @map("file_kind")
+  delimiter            String         @default(",")
+  status               JobStatus      @default(UPLOADED)
+  headers              Json           @default("[]")
+  mapping              Json?
+  totalRows            Int            @default(0) @map("total_rows")
+  processedRows        Int            @default(0) @map("processed_rows")
+  successRows          Int            @default(0) @map("success_rows")
+  /// Validation failures only (excludes pure duplicates)
+  failedRows           Int            @default(0) @map("failed_rows")
+  duplicateRows        Int            @default(0) @map("duplicate_rows")
+  cancelRequested      Boolean        @default(false) @map("cancel_requested")
+  errorMessage         String?        @map("error_message")
+  startedAt            DateTime?      @map("started_at")
+  completedAt          DateTime?      @map("completed_at")
+  createdAt            DateTime       @default(now()) @map("created_at")
+  updatedAt            DateTime       @updatedAt @map("updated_at")
+  user                 User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  records              ImportRecord[]
+  errors               ImportError[]
+
+  @@index([userId, createdAt])
+  @@map("import_jobs")
+}
+
+model SchemaField {
+  id        String    @id @default(cuid())
+  key       String    @unique
+  label     String
+  type      FieldType @default(STRING)
+  required  Boolean   @default(false)
+  unique    Boolean   @default(false)
+  pattern   String?
+  sortOrder Int       @default(0) @map("sort_order")
+
+  @@map("schema_fields")
+}
+
+model ImportRecord {
+  id          String    @id @default(cuid())
+  jobId       String    @map("job_id")
+  rowNumber   Int       @map("row_number")
+  email       String?
+  name        String?
+  phone       String?
+  amount      Decimal?  @db.Decimal(14, 2)
+  orderDate   DateTime? @map("order_date")
+  /// Mapped field values for dynamic schema export
+  data        Json      @default("{}")
+  raw         Json
+  fingerprint String
+  createdAt   DateTime  @default(now()) @map("created_at")
+  job         ImportJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, rowNumber])
+  @@index([jobId])
+  @@index([fingerprint])
+  @@index([email])
+  @@map("import_records")
+}
+
+model ImportError {
+  id        String    @id @default(cuid())
+  jobId     String    @map("job_id")
+  rowNumber Int       @map("row_number")
+  field     String?
+  code      String
+  message   String
+  raw       Json?
+  createdAt DateTime  @default(now()) @map("created_at")
+  job       ImportJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, rowNumber])
+  @@map("import_errors")
+}
